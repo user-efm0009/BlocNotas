@@ -1,9 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Objects;
 
 public class BlocNotas3 extends JFrame {
+
+    public JPanel panel1;
 
     public BlocNotas3() {
         setTitle("Bloc de Notas - Versión 3");
@@ -20,13 +23,11 @@ public class BlocNotas3 extends JFrame {
 
         JTabbedPane pestañas = new JTabbedPane();
 
-        // Panel Login
         BackgroundPanel loginPanel = new BackgroundPanel(fondo);
-        loginPanel.add(createFormularioPanel(iconoEmoji, "INICIO DE SESIÓN"));
+        loginPanel.add(crearFormulario(iconoEmoji, "INICIO DE SESIÓN"));
 
-        // Panel Registro
         BackgroundPanel registroPanel = new BackgroundPanel(fondo);
-        registroPanel.add(createFormularioPanel(iconoEmoji, "REGISTRO DE NUEVO USUARIO"));
+        registroPanel.add(crearFormulario(iconoEmoji, "REGISTRO DE NUEVO USUARIO"));
 
         pestañas.addTab("🔐 Inicio de sesión", loginPanel);
         pestañas.addTab("📝 Registro", registroPanel);
@@ -35,7 +36,7 @@ public class BlocNotas3 extends JFrame {
         setVisible(true);
     }
 
-    private JPanel createFormularioPanel(ImageIcon iconoEmoji, String titulo) {
+    private JPanel crearFormulario(ImageIcon iconoEmoji, String titulo) {
         JPanel panel = new JPanel();
         panel.setOpaque(false);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -51,7 +52,6 @@ public class BlocNotas3 extends JFrame {
         panel.add(logoPanel);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        // Usuario y contraseña
         JTextField usuarioField = new JTextField();
         usuarioField.setPreferredSize(new Dimension(200, usuarioField.getPreferredSize().height));
         usuarioField.setToolTipText("Introduce tu usuario");
@@ -71,6 +71,7 @@ public class BlocNotas3 extends JFrame {
         camposPanel.add(new JLabel("👤 Usuario:"), gbc);
         gbc.gridx = 1;
         camposPanel.add(usuarioField, gbc);
+
         gbc.gridx = 0;
         gbc.gridy = 1;
         camposPanel.add(new JLabel("🔒 Contraseña:"), gbc);
@@ -80,20 +81,19 @@ public class BlocNotas3 extends JFrame {
         panel.add(camposPanel);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Edad
-        JLabel edadLabel = new JLabel("Edad:");
-        edadLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JPanel edadPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        edadPanel.setOpaque(false);
+        JLabel edadLabel = new JLabel("🎂 Edad:");
         edadLabel.setForeground(Color.BLACK);
-        panel.add(edadLabel);
+        edadPanel.add(edadLabel);
+        panel.add(edadPanel);
 
         JSpinner edadSpinner = new JSpinner(new SpinnerNumberModel(18, 0, 100, 1));
         edadSpinner.setMaximumSize(new Dimension(100, 25));
-        edadSpinner.setAlignmentX(Component.CENTER_ALIGNMENT);
         edadSpinner.setToolTipText("Selecciona tu edad");
         panel.add(edadSpinner);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Barra de carga
         JProgressBar barraCarga = new JProgressBar(0, 100);
         barraCarga.setValue(0);
         barraCarga.setStringPainted(true);
@@ -101,22 +101,21 @@ public class BlocNotas3 extends JFrame {
         panel.add(barraCarga);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Slider de seguridad
+        JPanel seguridadPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        seguridadPanel.setOpaque(false);
+        JLabel seguridadLabel = new JLabel("🛡️ Nivel de seguridad:");
+        seguridadLabel.setForeground(Color.BLACK);
+        seguridadPanel.add(seguridadLabel);
+        panel.add(seguridadPanel);
+
         JSlider seguridadSlider = new JSlider(0, 10, 5);
         seguridadSlider.setMajorTickSpacing(2);
         seguridadSlider.setPaintTicks(true);
         seguridadSlider.setPaintLabels(true);
         seguridadSlider.setToolTipText("Nivel de seguridad");
-        JPanel seguridadLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        seguridadLabelPanel.setOpaque(false);
-        JLabel seguridadLabel = new JLabel("Nivel de seguridad:");
-        seguridadLabel.setForeground(Color.BLACK);
-        seguridadLabelPanel.add(seguridadLabel);
-        panel.add(seguridadLabelPanel);
         panel.add(seguridadSlider);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Checkbox
         JCheckBox terminosCheck = new JCheckBox("Aceptar términos y condiciones");
         terminosCheck.setAlignmentX(Component.CENTER_ALIGNMENT);
         terminosCheck.setOpaque(false);
@@ -124,7 +123,6 @@ public class BlocNotas3 extends JFrame {
         panel.add(terminosCheck);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Botones
         JButton aceptarButton = new JButton("Aceptar");
         JButton limpiarButton = new JButton("Eliminar");
 
@@ -136,13 +134,48 @@ public class BlocNotas3 extends JFrame {
         limpiarButton.setForeground(Color.WHITE);
         limpiarButton.setToolTipText("Borrar campos");
 
+        aceptarButton.addActionListener((ActionEvent e) -> {
+            String usuario = usuarioField.getText().trim();
+            String contraseña = new String(contraseñaField.getPassword()).trim();
+            boolean aceptaTerminos = terminosCheck.isSelected();
+
+            if (usuario.isEmpty() && contraseña.isEmpty() && !aceptaTerminos) {
+                mostrarAviso("Debes introducir usuario, contraseña y aceptar los términos.");
+                return;
+            }
+            if (usuario.isEmpty() && contraseña.isEmpty()) {
+                mostrarAviso("Debes introducir usuario y contraseña.");
+                return;
+            }
+            if (usuario.isEmpty()) {
+                mostrarAviso("Debes introducir el usuario.");
+                return;
+            }
+            if (contraseña.isEmpty()) {
+                mostrarAviso("Debes introducir la contraseña.");
+                return;
+            }
+            if (!aceptaTerminos) {
+                mostrarAviso("Debes aceptar los términos y condiciones.");
+                return;
+            }
+
+            int nivel = seguridadSlider.getValue();
+            simularCarga(barraCarga, () -> {
+                JOptionPane.showMessageDialog(panel,
+                        "Inicio de sesión exitoso.\nNivel de seguridad seleccionado: " + nivel,
+                        "Bienvenido",
+                        JOptionPane.INFORMATION_MESSAGE);
+            });
+        });
+
         limpiarButton.addActionListener((ActionEvent e) -> {
             usuarioField.setText("");
             contraseñaField.setText("");
             terminosCheck.setSelected(false);
             seguridadSlider.setValue(5);
-            barraCarga.setValue(0);
             edadSpinner.setValue(18);
+            simularCarga(barraCarga, null);
         });
 
         JPanel botonesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
@@ -152,6 +185,32 @@ public class BlocNotas3 extends JFrame {
         panel.add(botonesPanel);
 
         return panel;
+    }
+
+    private void simularCarga(JProgressBar barra, Runnable alFinalizar) {
+        barra.setValue(0);
+        Timer timer = new Timer(50, null);
+        timer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int valor = barra.getValue();
+                if (valor < 100) {
+                    barra.setValue(valor + 10);
+                } else {
+                    timer.stop();
+                    if (alFinalizar != null) alFinalizar.run();
+                    new Timer(1000, ev -> barra.setValue(0)).start();
+                }
+            }
+        });
+        timer.start();
+    }
+
+    private void mostrarAviso(String mensaje) {
+        JOptionPane.showMessageDialog(this,
+                mensaje,
+                "Campos obligatorios",
+                JOptionPane.WARNING_MESSAGE);
     }
 
     static class BackgroundPanel extends JPanel {
